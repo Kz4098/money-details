@@ -37,6 +37,11 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+            $request->validate([
+                'title' => 'required',
+                'content' => 'required',
+            ]);
+            
         $post = new Post();
         $post->title = $request->input('title');
         $post->content = $request->input('content');
@@ -74,8 +79,14 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
+        public function update(Request $request, Post $post)
     {
+        
+        $request->validate([
+            'title' => 'required',
+            'content' => 'required',
+            ]);
+            
         $post->title = $request->input('title');
         $post->content = $request->input('content');
         $post->save();
