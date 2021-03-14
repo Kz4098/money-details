@@ -1,8 +1,8 @@
-@extends('layouts,layouts')
+@extends('layouts.layouts')
 
 @session('title', 'Simple Board')
 
-@session('content')
+@section('content')
 
     @if (session('message'))
         {{ session('message') }}

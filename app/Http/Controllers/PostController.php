@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $post = Post::all();
+        $posts = Post::all();
         
         return view('posts.index', compact('posts'));
     }
@@ -69,7 +69,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return view('post.edit', compact('post'));
+        return view('posts.edit',compact('post'));
     }
 
     /**
@@ -104,6 +104,6 @@ class PostController extends Controller
     {
         $post->delete();
         
-        return redirect()->route('post.index');
+        return redirect()->route('posts.index');
     }
 }
