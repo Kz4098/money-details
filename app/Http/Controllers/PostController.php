@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Money_detail;
 use App\Post;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -14,9 +16,24 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::all();
+        $details=DB::select("SELECT SUM(kingaku) as kingaku,date,id FROM money_details group by date");
         
-        return view('posts.index', compact('posts'));
+        // $details=DB::select("SELECT SUM(kingaku) as kingaku FROM money_details where date='".$date."'");
+        // $arr = array("kingaku" =>$details[0]->kingaku,"date"=>$date);
+        // $obj = (object)$arr;
+    
+        return view('posts.index', ["posts"=>$details]);
+    }
+    public function total()
+    {
+        $posts = Money_detail::all();
+        $details=DB::select("SELECT strftime('%Y-%m',date) as date, SUM(kingaku) as kingaku FROM money_details GROUP BY date;");
+        
+        // $details=DB::select("SELECT SUM(kingaku) as kingaku FROM money_details where date='".$date."'");
+        // $arr = array("kingaku" =>$details[0]->kingaku,"date"=>$date);
+        // $obj = (object)$arr;
+    
+        return view('posts.total', ["posts"=>$details]);
     }
 
     /**
@@ -37,17 +54,37 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-            $request->validate([
-                'title' => 'required',
-                'content' => 'required',
-            ]);
+            // $request->validate([
+            //     'title' => 'required',
+            //     'content' => 'required',
+            // ]);
             
-        $post = new Post();
-        $post->title = $request->input('title');
-        $post->content = $request->input('content');
+        $post = new Money_detail();
+        $post->date = $request->input('date');
+        $post->item_id = 1;
+        $post->kingaku = $request->input('item_id_1');
+        $post->week_id = 1;
+        $post->month_id = $request->input('month_id');
         $post->save();
         
-        return redirect()->route('posts.show', ['id' => $post->id])->with('message', 'Post was successfully created.');
+        $post = new Money_detail();
+        $post->date = $request->input('date');
+        $post->item_id = 2;
+        $post->kingaku = $request->input('item_id_2');
+        $post->week_id = 1;
+        $post->month_id = $request->input('month_id');
+        $post->save();
+        
+        $post = new Money_detail();
+        $post->date = $request->input('date');
+        $post->item_id = 3;
+        $post->kingaku = $request->input('item_id_3');
+        $post->week_id = 1;
+        $post->month_id = $request->input('month_id');
+        $post->save();
+
+
+        return redirect('/posts');
     }
 
     /**
@@ -56,9 +93,14 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show($date)
     {
-        return view('posts.show', compact('post'));
+        $details=DB::select("SELECT SUM(kingaku) as kingaku FROM money_details where date='".$date."'");
+        $arr = array("kingaku" =>$details[0]->kingaku,"date"=>$date);
+        $obj = (object)$arr;
+       return view('posts.show', ["post"=>$obj]);
+       
+        // var_dump($details);
     }
 
     /**
@@ -67,9 +109,11 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function edit(Post $post)
+    public function edit( $id )
     {
-        return view('posts.edit',compact('post'));
+        $details=DB::select("select date from money_details where id=".$id.";") ;
+        $kingaku=DB::select("select kingaku from money_details where date='".$details[0]->date."';");
+        return view('posts.edit',compact('kingaku','details'));
     }
 
     /**
@@ -81,29 +125,37 @@ class PostController extends Controller
      */
         public function update(Request $request, Post $post)
     {
+        // DB::where('date',$request->input('date') )->where('item_id', '1')->update(['kingaku' => $request->input('item_id_1')]);
+        // DB::where('date',$request->input('date') )->where('item_id', '2')->update(['kingaku' => $request->input('item_id_2')]);
+        // DB::where('date',$request->input('date') )->where('item_id', '3')->update(['kingaku' => $request->input('item_id_3')]);
+        DB::select("update money_details set kingaku = ".$request->input('item_id_1')." where date='".$request->input('date')."' and item_id=1;") ;
+        DB::select("update money_details set kingaku = ".$request->input('item_id_2')." where date='".$request->input('date')."' and item_id=2;") ;
+        DB::select("update money_details set kingaku = ".$request->input('item_id_3')." where date='".$request->input('date')."' and item_id=3;") ;
+
+
         
-        $request->validate([
-            'title' => 'required',
-            'content' => 'required',
-            ]);
-            
-        $post->title = $request->input('title');
-        $post->content = $request->input('content');
-        $post->save();
-        
-        return redirect()->route('posts.show', ['id' => $post->id])->with('message', 'Post was successfully updated.');
+
+        return redirect('/posts');
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Post  $post
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\ResponseS
      */
-    public function destroy(Post $post)
+    public function destroy(Money_detail $post)
     {
         $post->delete();
         
         return redirect()->route('posts.index');
+    }
+    public function del(Request $request)
+    {
+        $data = new Money_detail;
+        $data->where('date', $request->input('date'))->delete();
+        
+        return redirect()->route('posts.index');
+
     }
 }

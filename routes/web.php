@@ -14,10 +14,15 @@
 Route::get('/', function () {
      return view('welcome');
  });
- 
+Route::get('/total', 'PostController@total');
+
 Route::get('/posts', 'PostController@index');
 
 Route::resource('posts', 'PostController');
+
+Route::post('/delete', 'PostController@del'); 
+
+Route::post('/update', 'PostController@update');
 
 if(env('APP_ENV') === 'local') {
     URL::forceScheme('https');
